@@ -9,6 +9,10 @@ const REVIEW = gql`
       body
       rating
       id
+      categories {
+        name
+        id
+      }
     }
   }
 `;
@@ -28,7 +32,9 @@ const ReviewDetails = () => {
     <div className="review-card">
       <div className="rating">{data.review.rating}</div>
       <h2>{data.review.title}</h2>
-      <small>cosole list</small>
+      {data.review.categories.map((category) => (
+        <small key={category.id}>{category.name}</small>
+      ))}
       <p>{data.review.body}</p>
     </div>
   );
