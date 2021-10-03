@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { gql, useQuery } from "@apollo/client";
+import ReactMarkdown from "react-markdown";
 const REVIEWS = gql`
   query GetReviews {
     reviews {
@@ -31,7 +32,11 @@ const Homepage = () => {
           {review.categories.map((category) => (
             <small key={category.id}>{category.name}</small>
           ))}
-          <p>{review.body.substring(0, 200)}...</p>
+          <ReactMarkdown>
+            {review.body
+              .substring(0, 200)
+              .replace("/uploads", "http://localhost:1337/uploads")}
+          </ReactMarkdown>
           <Link to={`/details/${review.id}`}>Read more</Link>
         </div>
       ))}

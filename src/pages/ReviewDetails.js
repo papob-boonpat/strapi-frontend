@@ -1,6 +1,7 @@
 import React from "react";
 import { useParams } from "react-router";
 import { gql, useQuery } from "@apollo/client";
+import ReactMarkdown from "react-markdown";
 
 const REVIEW = gql`
   query GetReview($id: ID!) {
@@ -28,6 +29,38 @@ const ReviewDetails = () => {
   if (error) return <p>Error :(</p>;
   console.log(data);
 
+  const MarkdownComponents = {
+    // Convert Markdown img to next/image component and set height, width and priority
+    // example: ![AltText {priority}{768x432}](...
+    p: (paragraph) => {
+      const { node } = paragraph;
+
+      if (node.children[0].tagName === "img") {
+        const image = node.children[0];
+        const alt = image.properties.alt?.replace(/ *\{[^)]*\} */g, "");
+        const isPriority = image.properties.alt
+          ?.toLowerCase()
+          .includes("{priority}");
+        const metaWidth = image.properties.alt.match(/{([^}]+)x/);
+        const metaHeight = image.properties.alt.match(/x([^}]+)}/);
+        const width = metaWidth ? metaWidth[1] : "100%";
+        // const height = metaHeight ? metaHeight[1] : "50%";
+
+        return (
+          <img
+            src={"http://localhost:1337" + image.properties.src}
+            width={width}
+            // height={height}
+            className="postImg"
+            alt={alt}
+            priority={isPriority}
+          />
+        );
+      }
+      return <p>{paragraph.children}</p>;
+    },
+  };
+
   return (
     <div className="review-card">
       <div className="rating">{data.review.rating}</div>
@@ -35,7 +68,9 @@ const ReviewDetails = () => {
       {data.review.categories.map((category) => (
         <small key={category.id}>{category.name}</small>
       ))}
-      <p>{data.review.body}</p>
+      <ReactMarkdown components={MarkdownComponents}>
+        {data.review.body}
+      </ReactMarkdown>
     </div>
   );
 };
